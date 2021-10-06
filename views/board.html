@@ -1,0 +1,79 @@
+{% extends 'layout.html' %}
+{% block content %}
+<link rel="stylesheet" href="/main.css">
+
+<div class="timeline">
+  {% if user %}
+  <div>
+    <form id="twit-form" action="/board" method="post">
+      <div class="input-group">
+        <textarea id="twit-title" name="title" placeholder="게시글 제목" maxlength="140"></textarea>
+        <textarea id="twit" name="comment" placeholder="게시글 내용" maxlength="140"></textarea>
+        <textarea id="twit-title" name="content" placeholder="#해시태그 입력" maxlength="140"></textarea>
+      </div>
+      <div>
+        <button id="twit-btn" type="submit" class="btn">게시</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+  <div class="twits">
+    <form id="hashtag-form" action="/board/hash" method="get">
+      <input type="text" name="hashtag" placeholder="태그 검색">
+      <button class="btn">검색</button>
+    </form>
+    {% for twit in twits %}
+    <div class="twit">
+      {% if twit.commenter == user.id %}
+      <div>
+        <form id="twit-delete" action="/board/delete" method="post">
+          <input id="twit-delete-id" value="{{twit.id}}" type="hidden" name="delete_post_id">
+          <button class="twit-delete" type="submit">삭제</button>
+        </form>
+        <form id="twit-update" action="/board/update" method="get">
+          <input id="twit-delete-id" value="{{twit.id}}" type="hidden" name="update_post_id">
+          <button class="twit-update" type="submit">수정</button>
+        </form>
+      </div>
+      {% endif %}
+      <h2 class="twit-title">{{"제목 : "+twit.title}}</h2>
+      <div>{{"작성 날짜 : " + twit.createdAt}}</div>
+      <div>{{"작성자 : " + twit.username}}</div>
+      <div class="twit-comment">{{"본문 : "+twit.comment}}</div> 
+      <text>{{"해시태그 : "+twit.content}}</text> 
+    </div>
+    {% endfor %}
+    <form id="hashtag-form" action="/board/search_id" method="get" style="float:left;">
+      <input type="text" name="writer" placeholder="작성자 검색">
+      <button class="btn">검색</button>
+    </form>
+    <form id="hashtag-form" action="/board/search_content" method="get" style="float:right;">
+      <input type="text" name="search" placeholder="게시글 본문 검색">
+      <button class="btn">검색</button>
+    </form>
+  </div>
+{% endblock %}
+
+{% block script %}
+<script>
+  document.querySelectorAll('.twit-follow').forEach(function (tag) {
+    tag.addEventListener('click', function () {
+      const myId = document.querySelector('#my-id');
+      if (myId) {
+        const userId = tag.parentNode.querySelector('.twit-user-id').value;
+        if (userId !== myId.value) {
+          if (confirm('게시물을 삭제하시겠습니까?')) {
+            axios.post(`/user/${userId}/follow`)
+              .then(() => {
+                location.reload();
+              })
+              .catch((err) => {
+                console.error(err);
+              });
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

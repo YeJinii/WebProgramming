@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% block content %}
+  <div class="timeline">
+    <form id="msg-form" action="/msg" method="post">
+      <div class=user-name>메시지 보내기</div>
+      <div class="input-group">
+        <input id="receive_id" value="{{twit.id}}" type="hidden" name="r_id"> 
+        <textarea id="twit-title" name="receiver" placeholder="받는 사람 이메일" maxlength="140"></textarea>
+        <textarea id="twit" name="content" placeholder="메시지 내용" maxlength="140"></textarea>
+      </div>
+      <div>
+        <button id="msg-btn" type="submit" class="btn">전송</button>
+      </div>
+    </form>
+    <div class="twits">
+      {% for twit in twits %}
+      <div class="twit">
+        <div>{{'전송 날짜 : '+twit.createdAt}}</div> 
+        <div>{{'보낸 사람 : '+twit.sender}}</div>
+        <div class="twit-comment">{{'발신 내용 : '+twit.content}}</div> 
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

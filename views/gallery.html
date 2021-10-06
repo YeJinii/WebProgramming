@@ -1,0 +1,73 @@
+{% extends 'layout.html' %}
+{% block content %}
+<link rel="stylesheet" href="/main.css">
+    <div class="timeline">
+      {% if user %}
+        <div>
+          <form id="twit-form" action="/gallery" method="post" enctype="multipart/form-data">
+            <div class="input-group">
+              <textarea id="twit-title" name="content" placeholder="#해시태그 입력" maxlength="140"></textarea>
+            </div>
+            <div class="img-preview">
+              <img id="img-preview" src="" style="display: none;" width="250" alt="미리보기">
+              <input id="img-url" type="hidden" name="url">
+            </div>
+            <div>
+              <label id="img-label" for="img">사진 업로드</label>
+              <input id="img" type="file" accept="image/*">
+              <button id="twit-btn" type="submit" class="btn">게시</button>
+            </div>
+          </form>
+        </div>
+      {% endif %}      
+      <div class="twits">
+        <form id="hashtag-form" action="/gallery/hash" method="get">
+          <input type="text" name="hashtag" placeholder="태그 검색">
+          <button class="btn">검색</button>
+        </form>
+        {% for twit in twits %}
+          <div class="twit">
+            {% if twit.commenter == user.id %}
+            <div>
+              <form id="twit-delete" action="/gallery/delete" method="post">
+                <input id="twit-delete-id" value="{{twit.id}}" type="hidden" name="delete_post_id">
+                <button class="twit-delete" type="submit">삭제</button>
+              </form>
+              <form id="twit-update" action="/gallery/update" method="get">
+                <input id="twit-delete-id" value="{{twit.id}}" type="hidden" name="update_post_id">
+                <button class="twit-update" type="submit">수정</button>
+              </form>
+            </div>
+            {% endif %}
+            <div class="twit-username">{{"작성자 : " + twit.username}}</div>
+            <div>{{"작성 날짜 : " + twit.createdAt}}</div>
+            {% if twit.img %}
+              <div class="twit-img"><img src="{{twit.img}}" alt="섬네일"></div>
+            {% endif %}
+            <div>{{twit.content}}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+  <script>
+    if (document.getElementById('img')) {
+      document.getElementById('img').addEventListener('change', function(e) {
+        const formData = new FormData();
+        console.log(this, this.files);
+        formData.append('img', this.files[0]);
+        axios.post('/gallery/img', formData)
+          .then((res) => {
+            document.getElementById('img-url').value = res.data.url;
+            document.getElementById('img-preview').src = res.data.url;
+            document.getElementById('img-preview').style.display = 'inline';
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      });
+    }
+  </script>
+{% endblock %}
